@@ -269,6 +269,21 @@ docker run -p 5000:5000 \
 
 This project is provided as-is for educational and development purposes.
 
+## 🆘 Troubleshooting
+
+### Render Deployment Issues
+
+**Issue: Build fails with Rust/cargo errors**
+- **Solution:** The project uses Python 3.11 (specified in `runtime.txt` and `render.yaml`) to avoid compilation issues with newer Python versions
+- Ensure `runtime.txt` contains `python-3.11.9`
+- Render should automatically use Python 3.11 if `runtime.txt` is present
+
+**Issue: Module not found errors**
+- **Solution:** Ensure all dependencies are in `requirements.txt` with pinned versions
+
+**Issue: Port binding errors**
+- **Solution:** The app automatically uses the `$PORT` environment variable set by Render
+
 ## 🆘 Support
 
 For issues or questions:
