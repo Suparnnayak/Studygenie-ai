@@ -39,11 +39,15 @@ class Config:
     # Supported Groq models
     GROQ_MODEL = os.getenv(
         "GROQ_MODEL",
-        "llama-3.1-70b-versatile"  # Default: best reasoning
+        "llama-3.3-70b-versatile"  # Default: latest 70B model (replaces deprecated llama-3.1-70b-versatile)
     )
 
     SUPPORTED_GROQ_MODELS = {
-        "llama-3.1-8b-instant"
+        "llama-3.3-70b-versatile",  # Latest 70B model
+        "llama-3.1-8b-instant",      # Fast 8B model
+        "llama-3.1-70b-versatile",   # Deprecated but kept for reference
+        "mixtral-8x7b-32768",        # Mixtral model
+        "gemma2-9b-it"               # Gemma 2 model
     }
 
     # -----------------------
@@ -75,10 +79,14 @@ class Config:
         if not cls.GROQ_API_KEY:
             raise RuntimeError("GROQ_API_KEY is not set")
 
+        # Note: Model validation is lenient - Groq may support models not in our list
+        # We log a warning but don't fail, allowing flexibility for new models
         if cls.GROQ_MODEL not in cls.SUPPORTED_GROQ_MODELS:
-            raise RuntimeError(
-                f"Unsupported GROQ_MODEL: {cls.GROQ_MODEL}. "
-                f"Supported models: {cls.SUPPORTED_GROQ_MODELS}"
+            import warnings
+            warnings.warn(
+                f"GROQ_MODEL '{cls.GROQ_MODEL}' not in known supported models. "
+                f"Known models: {cls.SUPPORTED_GROQ_MODELS}. "
+                f"Proceeding anyway - Groq may support this model."
             )
 
     @classmethod
