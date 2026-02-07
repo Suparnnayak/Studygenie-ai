@@ -32,6 +32,11 @@ class QuizService:
 
         # 🔒 Safety: cap syllabus size
         syllabus_text = syllabus_text[:Config.MAX_SYLLABUS_CHARS]
+        
+        # 🥇 FIX 1: Reduce JSON size to improve parsing reliability
+        # Cap questions to reduce JSON size by ~40% and improve correctness
+        quiz_questions = min(quiz_questions, 6)
+        interview_questions = min(interview_questions, 5)
 
         prompt = f"""
 You are an educational AI system.

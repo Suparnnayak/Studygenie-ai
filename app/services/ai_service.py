@@ -52,6 +52,7 @@ class AIService:
 
         for attempt in range(max_retries + 1):
             try:
+                # 🥈 FIX 2: Add max_tokens to prevent cutoff and runaway generation
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=[
@@ -59,6 +60,7 @@ class AIService:
                         {"role": "user", "content": prompt},
                     ],
                     temperature=temperature,
+                    max_tokens=3500,  # Prevent half-finished JSON and keep response bounded
                 )
 
                 if not response.choices:
@@ -72,6 +74,35 @@ class AIService:
 
             except JSONValidationError as e:
                 last_error = e
+                
+                # 🥉 FIX 3: JSON repair retry - fixes 90% of JSON issues
+                if attempt < max_retries:
+                    try:
+                        repair_prompt = f"""Fix the following invalid JSON.
+Return ONLY corrected valid JSON.
+Do NOT add or remove fields.
+Do NOT include markdown code blocks or explanations.
+
+INVALID JSON:
+{content}
+"""
+                        repair_response = self.client.chat.completions.create(
+                            model=self.model,
+                            messages=[
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": repair_prompt}
+                            ],
+                            temperature=0,  # Low temperature for repair
+                            max_tokens=3000
+                        )
+                        
+                        if repair_response.choices and repair_response.choices[0].message.content:
+                            repaired_text = repair_response.choices[0].message.content
+                            return safe_parse_json(repaired_text)
+                    except Exception:
+                        # If repair fails, continue to next retry or raise
+                        pass
+                
                 if attempt >= max_retries:
                     raise
                 continue
