@@ -18,10 +18,10 @@ class Config:
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads')
     ALLOWED_EXTENSIONS = {'pdf'}
     
-    # Gemini AI settings
-    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-    # Available models: gemini-2.5-flash, gemini-flash-latest, gemini-2.0-flash-001
-    GEMINI_MODEL = 'gemini-2.5-flash'  # Stable, fast, and supports up to 1M tokens
+    # Groq AI settings
+    GROQ_API_KEY = os.getenv('GROQ_API_KEY')
+    # Available models: llama-3.1-70b-versatile, llama-3.1-8b-instant, mixtral-8x7b-32768
+    GROQ_MODEL = 'llama-3.1-70b-versatile'  # High-performance model for complex tasks
     
     # Text processing settings
     CHUNK_SIZE = 1500

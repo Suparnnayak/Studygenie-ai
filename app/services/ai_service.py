@@ -1,22 +1,22 @@
 """
-AI service for interacting with Google Gemini API
+AI service for interacting with Groq API
 """
-import google.generativeai as genai
+from groq import Groq
 from typing import Dict, Any, Optional
 from app.config import Config
 from app.utils.json_validator import safe_parse_json, JSONValidationError
 
 
 class AIService:
-    """Service for interacting with Gemini AI"""
+    """Service for interacting with Groq AI"""
     
     def __init__(self):
-        """Initialize Gemini AI client"""
-        if not Config.GEMINI_API_KEY:
-            raise ValueError("GEMINI_API_KEY not found in environment variables")
+        """Initialize Groq AI client"""
+        if not Config.GROQ_API_KEY:
+            raise ValueError("GROQ_API_KEY not found in environment variables")
         
-        genai.configure(api_key=Config.GEMINI_API_KEY)
-        self.model = genai.GenerativeModel(Config.GEMINI_MODEL)
+        self.client = Groq(api_key=Config.GROQ_API_KEY)
+        self.model = Config.GROQ_MODEL
     
     def generate_response(
         self,
@@ -25,7 +25,7 @@ class AIService:
         temperature: float = 0.7
     ) -> Dict[str, Any]:
         """
-        Generate JSON response from Gemini AI with retry logic
+        Generate JSON response from Groq AI with retry logic
         
         Args:
             prompt: Prompt to send to AI
@@ -44,26 +44,31 @@ class AIService:
 
 CRITICAL: You must respond with ONLY valid JSON. Do not include markdown code blocks, explanations, or any text outside the JSON. Start your response directly with {{ and end with }}."""
         
-        generation_config = {
-            'temperature': temperature,
-        }
-        
         last_error = None
         current_prompt = json_prompt
         
         for attempt in range(max_retries + 1):
             try:
-                # Generate response
-                response = self.model.generate_content(
-                    current_prompt,
-                    generation_config=generation_config
+                # Generate response using Groq API
+                # Note: Groq may not support response_format, so we rely on prompt engineering
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": current_prompt
+                        }
+                    ],
+                    temperature=temperature
                 )
                 
-                if not response.text:
-                    raise ValueError("Empty response from Gemini API")
+                if not response.choices or not response.choices[0].message.content:
+                    raise ValueError("Empty response from Groq API")
+                
+                response_text = response.choices[0].message.content
                 
                 # Parse and validate JSON
-                parsed_json = safe_parse_json(response.text)
+                parsed_json = safe_parse_json(response_text)
                 return parsed_json
                 
             except JSONValidationError as e:
@@ -79,14 +84,14 @@ URGENT: Return ONLY valid JSON. No markdown, no code blocks, no explanations. Pu
             except Exception as e:
                 if attempt < max_retries:
                     continue
-                raise Exception(f"Gemini API error: {str(e)}")
+                raise Exception(f"Groq API error: {str(e)}")
         
         # Should not reach here, but handle just in case
         raise last_error or Exception("Failed to generate valid response")
     
     def generate_text_response(self, prompt: str, temperature: float = 0.7) -> str:
         """
-        Generate plain text response from Gemini AI
+        Generate plain text response from Groq AI
         
         Args:
             prompt: Prompt to send to AI
@@ -96,11 +101,20 @@ URGENT: Return ONLY valid JSON. No markdown, no code blocks, no explanations. Pu
             Text response string
         """
         try:
-            response = self.model.generate_content(
-                prompt,
-                generation_config={'temperature': temperature}
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=temperature
             )
-            return response.text if response.text else ""
+            
+            if response.choices and response.choices[0].message.content:
+                return response.choices[0].message.content
+            return ""
         except Exception as e:
-            raise Exception(f"Gemini API error: {str(e)}")
+            raise Exception(f"Groq API error: {str(e)}")
 

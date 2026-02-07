@@ -11,7 +11,7 @@ Look for:
 
 ### 2. Verify Environment Variables in Render
 In Render dashboard → Environment:
-- ✅ `GEMINI_API_KEY` - MUST be set (get from https://makersuite.google.com/app/apikey)
+- ✅ `GROQ_API_KEY` - MUST be set (get from https://console.groq.com)
 - ✅ `SECRET_KEY` - Should be auto-generated or set manually
 - ✅ `CORS_ORIGINS` - Set to `*` or your frontend URL
 - ✅ `FLASK_DEBUG` - Set to `False` for production
@@ -23,8 +23,8 @@ In Render dashboard → Environment:
 
 ### 4. Common Issues
 
-**Issue: Missing GEMINI_API_KEY**
-- Error in logs: "GEMINI_API_KEY not found"
+**Issue: Missing GROQ_API_KEY**
+- Error in logs: "GROQ_API_KEY not found"
 - Fix: Add it in Render dashboard → Environment
 
 **Issue: Import Errors**

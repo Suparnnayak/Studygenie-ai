@@ -1,6 +1,6 @@
 # StudyGenie AI Backend
 
-A production-ready Flask backend service that analyzes PDF syllabi and generates comprehensive study materials using Google Gemini 2.5 Flash AI.
+A production-ready Flask backend service that analyzes PDF syllabi and generates comprehensive study materials using Groq's Llama 3.1 70B Versatile AI.
 
 ## 🚀 Features
 
@@ -116,7 +116,7 @@ const data = await response.json();
 - **Python 3.10+**
 - **Flask** - Web framework
 - **pdfplumber** - PDF text extraction
-- **google-generativeai** - Gemini 2.5 Flash integration
+- **groq** - Groq Llama 3.1 70B Versatile integration
 - **Pydantic** - JSON schema validation
 - **python-dotenv** - Environment variable management
 - **gunicorn** - Production WSGI server
@@ -148,7 +148,7 @@ const data = await response.json();
 4. **Set up environment variables**
    Create a `.env` file:
    ```env
-   GEMINI_API_KEY=your_gemini_api_key_here
+   GROQ_API_KEY=your_groq_api_key_here
    SECRET_KEY=your_secret_key
    CORS_ORIGINS=*
    ```
@@ -170,7 +170,7 @@ const data = await response.json();
    - **Start Command:** `gunicorn wsgi:app --bind 0.0.0.0:$PORT`
    - **Environment:** Python 3
 4. **Add Environment Variables:**
-   - `GEMINI_API_KEY` - Your Gemini API key
+   - `GROQ_API_KEY` - Your Groq API key (get from https://console.groq.com)
    - `SECRET_KEY` - A secure random string
    - `CORS_ORIGINS` - Your frontend URL (or `*` for all)
    - `FLASK_DEBUG` - Set to `False` for production
@@ -186,7 +186,7 @@ The project includes a `render.yaml` file. Simply:
 
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
-| `GEMINI_API_KEY` | Google Gemini API key | ✅ Yes | - |
+| `GROQ_API_KEY` | Groq API key | ✅ Yes | - |
 | `SECRET_KEY` | Flask secret key | ⚠️ Recommended | Auto-generated |
 | `CORS_ORIGINS` | Allowed CORS origins (comma-separated) | ❌ No | `*` |
 | `PORT` | Server port (auto-set by Render) | ❌ No | `5000` |
@@ -204,7 +204,7 @@ studygenie-ai/
 │   │   └── routes.py        # API endpoints
 │   ├── services/
 │   │   ├── pdf_service.py   # PDF extraction
-│   │   ├── ai_service.py    # Gemini AI integration
+│   │   ├── ai_service.py    # Groq AI integration
 │   │   └── quiz_service.py  # Content generation
 │   ├── schemas/
 │   │   ├── quiz_schema.py   # Quiz models
@@ -250,7 +250,7 @@ curl -X POST http://localhost:5000/api/upload-pdf \
 - **PDF Requirements:** PDFs must contain extractable text (scanned PDFs not supported)
 - **File Size Limit:** Maximum 16MB per file
 - **Processing Time:** 10-30 seconds depending on PDF size
-- **API Rate Limits:** Be aware of Gemini API rate limits
+- **API Rate Limits:** Be aware of Groq API rate limits
 
 ## 🐳 Docker Deployment
 
@@ -260,7 +260,7 @@ docker build -t studygenie-ai .
 
 # Run
 docker run -p 5000:5000 \
-  -e GEMINI_API_KEY=your_key \
+  -e GROQ_API_KEY=your_key \
   -e SECRET_KEY=your_secret \
   studygenie-ai
 ```
@@ -288,5 +288,5 @@ This project is provided as-is for educational and development purposes.
 
 For issues or questions:
 - Check [Flask documentation](https://flask.palletsprojects.com/)
-- Check [Gemini API documentation](https://ai.google.dev/docs)
+- Check [Groq API documentation](https://console.groq.com/docs)
 - Check [Render documentation](https://render.com/docs)
