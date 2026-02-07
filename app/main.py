@@ -38,8 +38,11 @@ def create_app(config_class=Config):
     return app
 
 
+# Create app instance for gunicorn/WSGI servers
+app = create_app()
+
+
 if __name__ == '__main__':
-    app = create_app()
     # Get port from environment variable (for Render) or default to 5000
     port = int(os.getenv('PORT', 5000))
     debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
