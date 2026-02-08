@@ -135,3 +135,197 @@ RULES (MANDATORY)
 
         except Exception as e:
             raise RuntimeError(f"Error processing syllabus: {str(e)}")
+
+    def generate_topic_quiz(
+        self,
+        topic: str,
+        difficulty: str = "medium",
+        num_questions: int = 10
+    ) -> Dict[str, Any]:
+        """
+        Generate quiz questions for a specific topic
+        """
+        num_questions = min(num_questions, 15)  # Cap at 15 for reliability
+        
+        prompt = f"""
+You are an educational AI system.
+
+Generate {num_questions} multiple-choice quiz questions about the topic: "{topic}"
+
+Difficulty level: {difficulty}
+
+====================
+OUTPUT JSON FORMAT (STRICT)
+====================
+{{
+  "quiz": [
+    {{
+      "question": "Question text?",
+      "options": [
+        {{"text": "Option A", "is_correct": true}},
+        {{"text": "Option B", "is_correct": false}},
+        {{"text": "Option C", "is_correct": false}},
+        {{"text": "Option D", "is_correct": false}}
+      ],
+      "explanation": "Why the correct answer is correct",
+      "difficulty": "{difficulty}",
+      "topic": "{topic}"
+    }}
+  ],
+  "total_questions": {num_questions},
+  "topics_covered": ["{topic}"]
+}}
+
+====================
+RULES (MANDATORY)
+====================
+- Return ONLY valid JSON
+- No markdown, no explanations outside JSON
+- Every MCQ must have EXACTLY one correct option
+- Questions should be appropriate for {difficulty} difficulty
+- Cover different aspects of {topic}
+"""
+
+        try:
+            response = self.ai_service.generate_json_response(
+                prompt=prompt,
+                max_retries=1
+            )
+            
+            if "quiz" not in response:
+                raise ValueError("Missing quiz in AI response")
+            
+            return response
+            
+        except Exception as e:
+            raise RuntimeError(f"Error generating quiz: {str(e)}")
+
+    def generate_topic_flashcards(
+        self,
+        topic: str,
+        num_cards: int = 10
+    ) -> Dict[str, Any]:
+        """
+        Generate flashcards for a specific topic
+        """
+        num_cards = min(num_cards, 15)  # Cap at 15 for reliability
+        
+        prompt = f"""
+You are an educational AI system.
+
+Generate {num_cards} flashcards about the topic: "{topic}"
+
+Each flashcard should have:
+- Front: A question or concept
+- Back: The answer or explanation
+
+====================
+OUTPUT JSON FORMAT (STRICT)
+====================
+{{
+  "flashcards": [
+    {{
+      "front": "Question or concept",
+      "back": "Answer or explanation",
+      "difficulty": "easy | medium | hard",
+      "topic": "{topic}"
+    }}
+  ],
+  "total_cards": {num_cards},
+  "topic": "{topic}"
+}}
+
+====================
+RULES (MANDATORY)
+====================
+- Return ONLY valid JSON
+- No markdown, no explanations outside JSON
+- Front should be a clear question or concept
+- Back should be a comprehensive answer
+- Cover different aspects of {topic}
+"""
+
+        try:
+            response = self.ai_service.generate_json_response(
+                prompt=prompt,
+                max_retries=1
+            )
+            
+            if "flashcards" not in response:
+                raise ValueError("Missing flashcards in AI response")
+            
+            return response
+            
+        except Exception as e:
+            raise RuntimeError(f"Error generating flashcards: {str(e)}")
+
+    def generate_coding_challenge(
+        self,
+        topic: str,
+        difficulty: str = "medium",
+        language: str = "python"
+    ) -> Dict[str, Any]:
+        """
+        Generate a coding challenge for a specific topic
+        """
+        prompt = f"""
+You are an educational AI system.
+
+Generate a coding challenge about the topic: "{topic}"
+
+Difficulty: {difficulty}
+Language: {language}
+
+====================
+OUTPUT JSON FORMAT (STRICT)
+====================
+{{
+  "challenge": {{
+    "title": "Challenge Title",
+    "description": "Detailed problem description",
+    "difficulty": "{difficulty}",
+    "topic": "{topic}",
+    "starter_code": "// Starter code in {language}",
+    "test_cases": [
+      {{
+        "input": "input example",
+        "output": "expected output",
+        "explanation": "What this test case checks"
+      }}
+    ],
+    "hints": [
+      "Hint 1",
+      "Hint 2",
+      "Hint 3"
+    ],
+    "time_complexity": "O(n) or similar",
+    "space_complexity": "O(1) or similar",
+    "xp_reward": 50
+  }}
+}}
+
+====================
+RULES (MANDATORY)
+====================
+- Return ONLY valid JSON
+- No markdown, no explanations outside JSON
+- Challenge should be appropriate for {difficulty} difficulty
+- Include at least 3 test cases
+- Provide starter code in {language}
+- Include 3-5 progressive hints
+"""
+
+        try:
+            response = self.ai_service.generate_json_response(
+                prompt=prompt,
+                max_retries=1
+            )
+            
+            if "challenge" not in response:
+                raise ValueError("Missing challenge in AI response")
+            
+            return response
+            
+        except Exception as e:
+            raise RuntimeError(f"Error generating coding challenge: {str(e)}")
+

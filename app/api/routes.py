@@ -119,3 +119,147 @@ def upload_pdf():
                 os.remove(filepath)
         except Exception as cleanup_error:
             print(f"[Cleanup warning] {cleanup_error}")
+
+
+@api_bp.route("/generate-quiz", methods=["POST"])
+def generate_quiz():
+    """
+    Generate quiz questions for a specific topic
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                "error": "Invalid request",
+                "message": "Request body must be JSON"
+            }), 400
+        
+        topic = data.get("topic", "")
+        difficulty = data.get("difficulty", "medium").lower()
+        num_questions = data.get("num_questions", 10)
+        
+        if not topic:
+            return jsonify({
+                "error": "Missing topic",
+                "message": "Please provide a topic name"
+            }), 400
+        
+        # Validate difficulty
+        if difficulty not in ["easy", "medium", "hard"]:
+            difficulty = "medium"
+        
+        # Validate and cap question count
+        num_questions = max(1, min(int(num_questions), 20))
+        
+        # Generate quiz using AI service
+        quiz_service = QuizService()
+        quiz_data = quiz_service.generate_topic_quiz(
+            topic=topic,
+            difficulty=difficulty,
+            num_questions=num_questions
+        )
+        
+        # Validate response
+        try:
+            quiz_response = QuizResponse(**quiz_data).model_dump()
+            return jsonify(quiz_response), 200
+        except Exception as schema_error:
+            print(f"[Schema validation warning] {schema_error}")
+            return jsonify(quiz_data), 200
+            
+    except Exception as e:
+        print(f"[GENERATE_QUIZ_ERROR] {e}")
+        return jsonify({
+            "error": "Processing error",
+            "message": str(e)
+        }), 500
+
+
+@api_bp.route("/generate-flashcards", methods=["POST"])
+def generate_flashcards():
+    """
+    Generate flashcards for a specific topic
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                "error": "Invalid request",
+                "message": "Request body must be JSON"
+            }), 400
+        
+        topic = data.get("topic", "")
+        num_cards = data.get("num_cards", 10)
+        
+        if not topic:
+            return jsonify({
+                "error": "Missing topic",
+                "message": "Please provide a topic name"
+            }), 400
+        
+        # Validate and cap card count
+        num_cards = max(1, min(int(num_cards), 20))
+        
+        # Generate flashcards using AI service
+        quiz_service = QuizService()
+        flashcards_data = quiz_service.generate_topic_flashcards(
+            topic=topic,
+            num_cards=num_cards
+        )
+        
+        return jsonify(flashcards_data), 200
+            
+    except Exception as e:
+        print(f"[GENERATE_FLASHCARDS_ERROR] {e}")
+        return jsonify({
+            "error": "Processing error",
+            "message": str(e)
+        }), 500
+
+
+@api_bp.route("/generate-coding-challenge", methods=["POST"])
+def generate_coding_challenge():
+    """
+    Generate coding challenge for a specific topic
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                "error": "Invalid request",
+                "message": "Request body must be JSON"
+            }), 400
+        
+        topic = data.get("topic", "")
+        difficulty = data.get("difficulty", "medium").lower()
+        language = data.get("language", "python")
+        
+        if not topic:
+            return jsonify({
+                "error": "Missing topic",
+                "message": "Please provide a topic name"
+            }), 400
+        
+        # Validate difficulty
+        if difficulty not in ["easy", "medium", "hard"]:
+            difficulty = "medium"
+        
+        # Generate coding challenge using AI service
+        quiz_service = QuizService()
+        challenge_data = quiz_service.generate_coding_challenge(
+            topic=topic,
+            difficulty=difficulty,
+            language=language
+        )
+        
+        return jsonify(challenge_data), 200
+            
+    except Exception as e:
+        print(f"[GENERATE_CODING_CHALLENGE_ERROR] {e}")
+        return jsonify({
+            "error": "Processing error",
+            "message": str(e)
+        }), 500
